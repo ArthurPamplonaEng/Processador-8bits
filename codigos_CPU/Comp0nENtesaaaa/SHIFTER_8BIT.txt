@@ -1,0 +1,43 @@
+-- ===============================================
+--  NOVO FICHEIRO: SHIFTER_8BIT.vhd
+--  (Deslocador lógico de 1 bit)
+-- ===============================================
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity SHIFTER_8BIT is
+    Port (
+        -- Entrada
+        A_IN : in  std_logic_vector(7 downto 0);
+        
+        -- '0' = Shift Left (SLB), '1' = Shift Right (SRB)
+        OP   : in  std_logic; 
+        
+        -- Saídas
+        R_OUT : out std_logic_vector(7 downto 0);
+        C_OUT : out std_logic -- O bit que "caiu" (Carry)
+    );
+end SHIFTER_8BIT;
+
+architecture Behavioral of SHIFTER_8BIT is
+begin
+
+    process(A_IN, OP)
+    begin
+        if OP = '0' then
+            -- SLB (Shift Left)
+            -- O bit 7 (mais à esquerda) vai para o Carry
+            C_OUT <= A_IN(7);
+            -- Os bits 6..0 são movidos, e um '0' entra à direita
+            R_OUT <= A_IN(6 downto 0) & '0';
+        else
+            -- SRB (Shift Right)
+            -- O bit 0 (mais à direita) vai para o Carry
+            C_OUT <= A_IN(0);
+            -- Os bits 7..1 são movidos, e um '0' entra à esquerda
+            R_OUT <= '0' & A_IN(7 downto 1);
+        end if;
+    end process;
+
+end Behavioral;

@@ -1,0 +1,479 @@
+-- ========================================
+-- ULA COMPLETA (8 BITS)
+-- Inclui todas as unidades e flags de comparacao
+-- ========================================
+library IEEE;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+-- ========================================
+-- UNIDADE 1: SOMADOR DE 1 BIT (Full Adder)
+-- ========================================
+entity FULL_ADDER is
+    port(
+        A    : in  std_logic;
+        B    : in  std_logic;
+        Cin  : in  std_logic;
+        S    : out std_logic;
+        Cout : out std_logic
+    );
+end FULL_ADDER;
+
+architecture STRUCTURAL of FULL_ADDER is
+begin
+    S    <= A xor B xor Cin;
+    Cout <= (A and B) or (B and Cin) or (A and Cin);
+end STRUCTURAL;
+
+-- ========================================
+-- UNIDADE 2: SOMADOR DE 8 BITS (Ripple Carry Adder)
+-- ========================================
+library IEEE;
+use ieee.std_logic_1164.all;
+entity ADDER_8BIT is
+    port(
+        A    : in  std_logic_vector(7 downto 0);
+        B    : in  std_logic_vector(7 downto 0);
+        Cin  : in  std_logic;
+        S    : out std_logic_vector(7 downto 0);
+        Cout : out std_logic
+    );
+end ADDER_8BIT;
+
+architecture STRUCTURAL of ADDER_8BIT is
+    component FULL_ADDER is
+        port(
+            A    : in  std_logic;
+            B    : in  std_logic;
+            Cin  : in  std_logic;
+            S    : out std_logic;
+            Cout : out std_logic
+        );
+    end component;
+    signal carry : std_logic_vector(6 downto 0);
+begin
+    FA0: FULL_ADDER port map(A(0), B(0), Cin,      S(0), carry(0));
+    FA1: FULL_ADDER port map(A(1), B(1), carry(0), S(1), carry(1));
+    FA2: FULL_ADDER port map(A(2), B(2), carry(1), S(2), carry(2));
+    FA3: FULL_ADDER port map(A(3), B(3), carry(2), S(3), carry(3));
+    FA4: FULL_ADDER port map(A(4), B(4), carry(3), S(4), carry(4));
+    FA5: FULL_ADDER port map(A(5), B(5), carry(4), S(5), carry(5));
+    FA6: FULL_ADDER port map(A(6), B(6), carry(5), S(6), carry(6));
+    FA7: FULL_ADDER port map(A(7), B(7), carry(6), S(7), Cout);
+end STRUCTURAL;
+
+-- ========================================
+-- UNIDADE 3: SUBTRATOR DE 8 BITS (usando complemento de 2)
+-- ========================================
+library IEEE;
+use ieee.std_logic_1164.all;
+entity SUBTRACTOR_8BIT is
+    port(
+        A    : in  std_logic_vector(7 downto 0);
+        B    : in  std_logic_vector(7 downto 0);
+        S    : out std_logic_vector(7 downto 0);
+        Bout : out std_logic
+    );
+end SUBTRACTOR_8BIT;
+
+architecture STRUCTURAL of SUBTRACTOR_8BIT is
+    component ADDER_8BIT is
+        port(
+            A    : in  std_logic_vector(7 downto 0);
+            B    : in  std_logic_vector(7 downto 0);
+            Cin  : in  std_logic;
+            S    : out std_logic_vector(7 downto 0);
+            Cout : out std_logic
+        );
+    end component;
+    signal B_inv : std_logic_vector(7 downto 0);
+begin
+    B_inv <= not B;
+    SUB: ADDER_8BIT port map(
+        A    => A,
+        B    => B_inv,
+        Cin  => '1',
+        S    => S,
+        Cout => Bout
+    );
+end STRUCTURAL;
+
+-- ========================================
+-- UNIDADE 4: MULTIPLICADOR DE 8 BITS
+-- ========================================
+library IEEE;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+entity MULTIPLIER_8BIT is
+    port(
+        A : in  std_logic_vector(7 downto 0);
+        B : in  std_logic_vector(7 downto 0);
+        P : out std_logic_vector(7 downto 0)
+    );
+end MULTIPLIER_8BIT;
+
+architecture BEHAVIORAL of MULTIPLIER_8BIT is
+    signal product : std_logic_vector(15 downto 0);
+begin
+    process(A, B)
+        variable temp : unsigned(15 downto 0);
+    begin
+        temp := unsigned(A) * unsigned(B);
+        product <= std_logic_vector(temp);
+    end process;
+    P <= product(7 downto 0);
+end BEHAVIORAL;
+
+-- ========================================
+-- UNIDADE 5: DIVISOR DE 8 BITS
+-- ========================================
+library IEEE;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+entity DIVIDER_8BIT is
+    port(
+        A         : in  std_logic_vector(7 downto 0);
+        B         : in  std_logic_vector(7 downto 0);
+        Q         : out std_logic_vector(7 downto 0);
+        R         : out std_logic_vector(7 downto 0);
+        DivByZero : out std_logic
+    );
+end DIVIDER_8BIT;
+
+architecture BEHAVIORAL of DIVIDER_8BIT is
+begin
+    process(A, B)
+        variable dividend : unsigned(7 downto 0);
+        variable divisor  : unsigned(7 downto 0);
+        variable quotient : unsigned(7 downto 0);
+        variable remainder: unsigned(7 downto 0);
+    begin
+        dividend := unsigned(A);
+        divisor  := unsigned(B);
+        if divisor = 0 then
+            Q <= (others => '1');
+            R <= (others => '1');
+            DivByZero <= '1';
+        else
+            quotient := dividend / divisor;
+            remainder := dividend mod divisor;
+            Q <= std_logic_vector(quotient);
+            R <= std_logic_vector(remainder);
+            DivByZero <= '0';
+        end if;
+    end process;
+end BEHAVIORAL;
+
+-- ========================================
+-- UNIDADE 6: UNIDADE LOGICA (Logic Unit)
+-- ========================================
+library IEEE;
+use ieee.std_logic_1164.all;
+entity LOGIC_UNIT_8BIT is
+    port(
+        A  : in  std_logic_vector(7 downto 0);
+        B  : in  std_logic_vector(7 downto 0);
+        OP : in  std_logic_vector(1 downto 0);
+        R  : out std_logic_vector(7 downto 0)
+    );
+end LOGIC_UNIT_8BIT;
+
+architecture STRUCTURAL of LOGIC_UNIT_8BIT is
+begin
+    process(A, B, OP)
+    begin
+        case OP is
+            when "00"    => R <= A and B;
+            when "01"    => R <= A or B;
+            when "10"    => R <= A xor B;
+            when "11"    => R <= not A;
+            when others => R <= (others => '0');
+        end case;
+    end process;
+end STRUCTURAL;
+
+-- ========================================
+-- UNIDADE 7: COMPARATOR DE 8 BITS
+-- ========================================
+library IEEE;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity COMPARATOR is
+    port(
+        A      : in  unsigned(7 downto 0);
+        B      : in  unsigned(7 downto 0);
+        op_cmp : in  std_logic_vector(2 downto 0);  -- tipo de comparação
+        result : out std_logic;
+        Z      : out std_logic;  -- Igual
+        N      : out std_logic;  -- Menor
+        V      : out std_logic   -- Maior
+    );
+end COMPARATOR;
+
+architecture BEHAVIORAL of COMPARATOR is
+begin
+    process(A, B, op_cmp)
+    begin
+        Z <= '0';
+        N <= '0';
+        V <= '0';
+        result <= '0';
+
+        case op_cmp is
+            when "000" =>  -- Igualdade
+                if A = B then
+                    result <= '1';
+                    Z <= '1';
+                end if;
+
+            when "001" =>  -- A < B
+                if A < B then
+                    result <= '1';
+                    N <= '1';
+                end if;
+
+            when "010" =>  -- A > B
+                if A > B then
+                    result <= '1';
+                    V <= '1';
+                end if;
+
+            when others =>
+                result <= '0';
+        end case;
+    end process;
+end architecture;
+
+-- ========================================
+-- ULA COMPLETA - INTEGRACAO DE TODAS AS UNIDADES
+-- ========================================
+library IEEE;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+entity ULA_8_BITS is
+    port(
+        Fst    : in  std_logic_vector(7 downto 0);
+        Scd    : in  std_logic_vector(7 downto 0);
+        OP     : in  std_logic_vector(3 downto 0);
+        
+        RESULT : out std_logic_vector(7 downto 0);
+        COUT   : out std_logic;
+        ZERO   : out std_logic;
+        OVF    : out std_logic;
+        NEG    : out std_logic
+    );
+end ULA_8_BITS;
+
+architecture STRUCTURAL of ULA_8_BITS is
+    
+    component ADDER_8BIT is
+        port(
+            A    : in  std_logic_vector(7 downto 0); B    : in  std_logic_vector(7 downto 0);
+            Cin  : in  std_logic;                    S    : out std_logic_vector(7 downto 0);
+            Cout : out std_logic
+        );
+    end component;
+    
+    component SUBTRACTOR_8BIT is
+        port(
+            A    : in  std_logic_vector(7 downto 0); B    : in  std_logic_vector(7 downto 0);
+            S    : out std_logic_vector(7 downto 0); Bout : out std_logic
+        );
+    end component;
+    
+    component MULTIPLIER_8BIT is
+        port(
+            A : in  std_logic_vector(7 downto 0); B : in  std_logic_vector(7 downto 0);
+            P : out std_logic_vector(7 downto 0)
+        );
+    end component;
+    
+    component DIVIDER_8BIT is
+        port(
+            A         : in  std_logic_vector(7 downto 0); B         : in  std_logic_vector(7 downto 0);
+            Q         : out std_logic_vector(7 downto 0); R         : out std_logic_vector(7 downto 0);
+            DivByZero : out std_logic
+        );
+    end component;
+    
+    component COMPARATOR is
+        port(
+            A      : in  unsigned(7 downto 0);
+            B      : in  unsigned(7 downto 0);
+            op_cmp : in  std_logic_vector(2 downto 0);
+            result : out std_logic;
+            Z      : out std_logic;
+            N      : out std_logic;
+            V      : out std_logic
+        );
+    end component;
+    
+    component LOGIC_UNIT_8BIT is
+        port(
+            A  : in  std_logic_vector(7 downto 0); B  : in  std_logic_vector(7 downto 0);
+            OP : in  std_logic_vector(1 downto 0); R  : out std_logic_vector(7 downto 0)
+        );
+    end component;
+    
+    component SHIFTER_8BIT is
+    Port (
+        A_IN  : in  std_logic_vector(7 downto 0);
+        OP    : in  std_logic; 
+        R_OUT : out std_logic_vector(7 downto 0);
+        C_OUT : out std_logic
+    );
+	end component;
+
+    -- Sinais para os resultados das operações
+    signal add_result   : std_logic_vector(7 downto 0);
+    signal sub_result   : std_logic_vector(7 downto 0);
+    signal mult_result  : std_logic_vector(7 downto 0);
+    signal div_result   : std_logic_vector(7 downto 0);
+    signal mod_result   : std_logic_vector(7 downto 0);
+    signal logic_result : std_logic_vector(7 downto 0);
+    
+    -- Sinais de carry, overflow, etc.
+    signal add_cout     : std_logic;
+    signal sub_cout     : std_logic;
+    signal div_error    : std_logic;
+    
+    -- Sinais do comparator
+    signal comp_result : std_logic;
+    signal comp_Z, comp_N, comp_V : std_logic;
+    
+    -- Sinal temporário de resultado
+    signal result_temp  : std_logic_vector(7 downto 0);
+    signal logic_op_sel : std_logic_vector(1 downto 0);
+    
+    signal shifter_result : std_logic_vector(7 downto 0);
+signal shifter_carry  : std_logic;
+signal shifter_op     : std_logic;
+    
+begin
+
+    -- Instância dos componentes da ULA
+    ADDER_UNIT: ADDER_8BIT port map(
+        A => Fst, B => Scd, Cin => '0', S => add_result, Cout => add_cout
+    );
+    
+    SUBTRACTOR_UNIT: SUBTRACTOR_8BIT port map(
+        A => Fst, B => Scd, S => sub_result, Bout => sub_cout
+    );
+    
+    MULTIPLIER_UNIT: MULTIPLIER_8BIT port map(
+        A => Fst, B => Scd, P => mult_result
+    );
+    
+    DIVIDER_UNIT: DIVIDER_8BIT port map(
+        A => Fst, B => Scd, Q => div_result, R => mod_result, DivByZero => div_error
+    );
+    
+    LOGIC_UNIT: LOGIC_UNIT_8BIT port map(
+        A  => Fst,
+        B  => Scd,
+        OP => logic_op_sel,
+        R  => logic_result
+    );
+    
+    SHIFTER_UNIT: SHIFTER_8BIT port map(
+    A_IN  => Fst,
+    OP    => shifter_op,
+    R_OUT => shifter_result,
+    C_OUT => shifter_carry
+);
+
+    -- Instância do Comparator
+    COMPARATOR_UNIT: COMPARATOR port map(
+        A => unsigned(Fst),
+        B => unsigned(Scd),
+        op_cmp => OP(2 downto 0),  -- Passando a operação de comparação
+        result => comp_result,
+        Z => comp_Z,
+        N => comp_N,
+        V => comp_V
+    );
+
+    -- Processo de controle das operações da ULA
+    process(OP, add_result, sub_result, mult_result, div_result, mod_result, 
+            logic_result, add_cout, sub_cout, comp_Z, comp_N, comp_V,shifter_result, shifter_carry)
+    begin
+        -- Inicializa o resultado
+        result_temp  <= (others => '0');
+        COUT         <= '0';
+        logic_op_sel <= "00";
+        shifter_op   <= '0';
+        
+        -- Seleção da operação da ULA
+        -- SUBSTITUA O CASE OP INTEIRO POR ESTE:
+case OP is
+    when "0000" => -- ADD
+        result_temp <= add_result;
+        COUT        <= add_cout;
+
+    when "0001" => -- SUB
+        result_temp <= sub_result;
+        COUT        <= sub_cout;
+
+    when "0010" => -- MUL
+        result_temp <= mult_result;
+        COUT        <= '0';
+
+    when "0011" => -- DIV
+        result_temp <= div_result;
+        COUT        <= '0';
+
+    when "0100" => -- MOD
+        result_temp <= mod_result;
+        COUT        <= '0';
+
+    when "0101" => -- AND
+        logic_op_sel <= "00";
+        result_temp  <= logic_result;
+        COUT         <= '0';
+
+    when "0110" => -- OR
+        logic_op_sel <= "01";
+        result_temp  <= logic_result;
+        COUT         <= '0';
+
+    when "0111" => -- XOR
+        logic_op_sel <= "10";
+        result_temp  <= logic_result;
+        COUT         <= '0';
+
+    when "1000" => -- NOT 
+        logic_op_sel <= "11"; -- Ativa o "not A" na LOGIC_UNIT
+        result_temp  <= logic_result;
+        COUT         <= '0';
+
+
+	when "1001" => -- SLB
+    shifter_op  <= '0';
+    result_temp <= shifter_result;
+    COUT        <= shifter_carry; -- Passa o bit que "caiu" para o Carry Flag
+
+	when "1010" => -- SRB
+    shifter_op  <= '1';
+    result_temp <= shifter_result;
+    COUT        <= shifter_carry; -- Passa o bit que "caiu" para o Carry Flag
+
+    when others =>
+        result_temp <= (others => '0');
+        COUT        <= '0';
+	end case;
+    end process;
+    
+    RESULT <= result_temp;
+    
+    ZERO <= '1' when unsigned(result_temp) = 0 else '0';
+    
+    NEG <= result_temp(7);
+    
+    OVF <= (Fst(7) and Scd(7) and not result_temp(7)) or 
+           (not Fst(7) and not Scd(7) and result_temp(7)) when OP = "000" else
+           (Fst(7) and not Scd(7) and not result_temp(7)) or 
+           (not Fst(7) and Scd(7) and result_temp(7)) when OP = "001" else
+           '0';
+
+end STRUCTURAL;

@@ -22,7 +22,7 @@ end entity design;
 
 architecture Behavioral of design is
 
-    -- COMPONENT DECLARATIONS (assumem os componentes que você forneceu)
+    -- COMPONENT DECLARATIONS 
     component control_unit_FSM
         Port (
             clk         : in  std_logic;
@@ -174,8 +174,8 @@ architecture Behavioral of design is
     signal data_mem_addr   : std_logic_vector(7 downto 0);
     signal data_mem_dout   : std_logic_vector(7 downto 0);
     signal data_mem_din    : std_logic_vector(7 downto 0);
-    signal data_mem_we     : std_logic := '0'; -- NOT controlled by FSM yet (see comentário)
-    -- you may wire data_mem_we to a mem_write output from FSM later
+    signal data_mem_we     : std_logic := '0'; -- NOT controlled by FSM yet 
+  
 
     -- writeback MUX output
     signal wb_data_sig     : std_logic_vector(7 downto 0);
@@ -196,10 +196,6 @@ architecture Behavioral of design is
 begin
 	--atribuicao do sinal auxiliar register
     flags_we_sig <= flags_write_en_sig;
-    
-    --atribuicao do sinal auxiliar alu
-     -- alu_fst_sig <= rf_data_A_sig when alu_src_b_sig = '0' else (others => '0');  -- MOVI zera 
-   -- alu_scd_sig <= rf_data_B_sig when alu_src_b_sig = '0' else imm_ext;
    
     --atribuicao do sinal auxiliar alu (MUX A e MUX B) FEITO AGORA ARTHUR PAMPLONA 01/11/2025 11:35
 -- MUX A: Seleciona 0 (se alu_src_a_sig=1) ou RegA (se alu_src_a_sig=0)
@@ -298,7 +294,6 @@ alu_scd_sig <= imm_ext when alu_src_b_sig = '1' else rf_data_B_sig;
         );
 
     -- NOTE:
-    -- ALU immediate support: your FSM sets ALU_SRC_B_SEL='1' for immediate.
     -- The assembler packs immediates in RIL nibble(s). We'll provide immediate to ALU by constructing
     -- a small vector from ril_out (low nibble) when alu_src_b_sig='1'.
     -- We must override ALU.ScD input in that case. Implement via combinational assignment:
@@ -338,7 +333,7 @@ alu_scd_sig <= imm_ext when alu_src_b_sig = '1' else rf_data_B_sig;
     data_mem_addr <= rf_data_B_sig;
     data_mem_din  <= rf_data_A_sig; -- store source from A (convention; adjust as needed)
 
-    -- data_mem_we: TODO: connect to mem write control from FSM.
+    -- data_mem_we: TODO: connect to mem write control from FSM (quando tiver memoria ext fdp).
     -- For now left '0'; map to '1' when you add mem_write output in FSM.
     data_mem_we <= '0';
 
@@ -364,3 +359,4 @@ alu_scd_sig <= imm_ext when alu_src_b_sig = '1' else rf_data_B_sig;
     end process;
     
 end Behavioral;
+

@@ -405,7 +405,6 @@ begin
         shifter_op   <= '0';
         
         -- Seleção da operação da ULA
-        -- SUBSTITUA O CASE OP INTEIRO POR ESTE:
 case OP is
     when "0000" => -- ADD
         result_temp <= add_result;
@@ -477,3 +476,4 @@ case OP is
            '0';
 
 end STRUCTURAL;
+

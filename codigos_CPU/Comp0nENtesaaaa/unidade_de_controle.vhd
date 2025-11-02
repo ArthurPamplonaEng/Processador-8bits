@@ -1,6 +1,7 @@
 -- ===============================================
 --  UNIDADE DE CONTROLE (control_unit_FSM.vhd)
 --  VERSAO CORRIGIDA (2 Processos) e COMPLETA
+-- ESSE BAGULHO AQUI FOI MODIFICADO TAAAANTAS VEZES PQP
 -- ===============================================
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -247,10 +248,10 @@ begin
                         null; -- NOP
                 end case;
                 
-                -- CORREÇÃO 1: Faltava o 'next_state'
+           
                 next_state <= FETCH_OPCODE;
         
-        -- CORREÇÃO 2: Faltava o 'end case' para o 'case current_state is'
+    
         end case; 
         
         -- ==================================================
@@ -275,4 +276,5 @@ begin
 
     end process;
     
+
 end Behavioral;

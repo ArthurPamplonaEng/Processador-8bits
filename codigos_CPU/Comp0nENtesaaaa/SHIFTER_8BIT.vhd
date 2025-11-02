@@ -1,5 +1,5 @@
 -- ===============================================
---  NOVO FICHEIRO: SHIFTER_8BIT.vhd
+--   SHIFTER_8BIT.vhd
 --  (Deslocador lógico de 1 bit)
 -- ===============================================
 library IEEE;
@@ -39,5 +39,6 @@ begin
             R_OUT <= '0' & A_IN(7 downto 1);
         end if;
     end process;
+
 
 end Behavioral;

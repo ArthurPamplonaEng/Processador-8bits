@@ -22,7 +22,7 @@ architecture Behavioral of rom_memoria is
     -- 1. Definição do tipo da memória
     type MEMORY_ARRAY is array (0 to 255) of std_logic_vector(7 downto 0);
     
-    -- 2. A memória agora é um "signal", não uma "constant".
+    -- 2. A memória agora é um "signal", 
     --    Isso significa que ela é uma memória real (RAM) que 
     --    pode ter seus valores alterados.
     --    Nós a inicializamos com zeros.
@@ -94,4 +94,5 @@ begin
     --    (Sempre que 's_address' mudar, 'DATA' é atualizado imediatamente)
     DATA <= PROGRAM_MEM(s_address);
     
+
 end Behavioral;

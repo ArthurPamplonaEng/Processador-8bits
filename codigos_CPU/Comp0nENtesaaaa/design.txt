@@ -36,12 +36,13 @@ architecture Behavioral of design is
             RIH_WRITE_EN: out std_logic;
             RIL_WRITE_EN: out std_logic;
             REG_WRITE_EN: out std_logic;
+            FLAGS_WRITE_EN: out std_logic;
             REG_SEL_RD  : out std_logic_vector(3 downto 0);
             REG_SEL_A   : out std_logic_vector(3 downto 0);
             REG_SEL_B   : out std_logic_vector(3 downto 0);
             MEM_TO_REG_SEL : out std_logic;
             WRITEBACK_SRC  : out std_logic_vector(1 downto 0);
-            ALU_OP_OUT     : out std_logic_vector(2 downto 0);
+            ALU_OP_OUT     : out std_logic_vector(3 downto 0);
             --O ALU_SRC_A_SEL ADICIONADO AGORA 01/11/2025 11:29 POR ARTHUR PAMPLONA
             ALU_SRC_A_SEL  : out std_logic; -- << 
             ALU_SRC_B_SEL  : out std_logic
@@ -89,7 +90,7 @@ architecture Behavioral of design is
         Port (
             Fst    : in  std_logic_vector(7 downto 0);
             Scd    : in  std_logic_vector(7 downto 0);
-            OP     : in  std_logic_vector(2 downto 0);
+            OP     : in  std_logic_vector(3 downto 0);
             RESULT : out std_logic_vector(7 downto 0);
             COUT   : out std_logic;
             ZERO   : out std_logic;
@@ -133,12 +134,13 @@ architecture Behavioral of design is
     signal rih_we_sig       : std_logic;
     signal ril_we_sig       : std_logic;
     signal reg_write_en_sig : std_logic;
+    signal flags_write_en_sig : std_logic;
     signal reg_sel_rd_sig   : std_logic_vector(3 downto 0);
     signal reg_sel_a_sig    : std_logic_vector(3 downto 0);
     signal reg_sel_b_sig    : std_logic_vector(3 downto 0);
     signal mem_to_reg_sig   : std_logic;
     signal writeback_src_sig: std_logic_vector(1 downto 0);
-    signal alu_op_sig       : std_logic_vector(2 downto 0);
+    signal alu_op_sig       : std_logic_vector(3 downto 0);
     signal alu_src_b_sig    : std_logic;
     --ADCIONANDO MANUALEMNTE TALVEZ DE ERRO AAAAAAAAAAAAAAAAAAAA
 	signal alu_src_a_sig    : std_logic;
@@ -193,7 +195,7 @@ architecture Behavioral of design is
 
 begin
 	--atribuicao do sinal auxiliar register
-    flags_we_sig <= '1' when (reg_write_en_sig = '1' and writeback_src_sig = "00") else '0';
+    flags_we_sig <= flags_write_en_sig;
     
     --atribuicao do sinal auxiliar alu
      -- alu_fst_sig <= rf_data_A_sig when alu_src_b_sig = '0' else (others => '0');  -- MOVI zera 
@@ -221,6 +223,7 @@ alu_scd_sig <= imm_ext when alu_src_b_sig = '1' else rf_data_B_sig;
             RIH_WRITE_EN=> rih_we_sig,
             RIL_WRITE_EN=> ril_we_sig,
             REG_WRITE_EN=> reg_write_en_sig,
+            FLAGS_WRITE_EN => flags_write_en_sig,
             REG_SEL_RD  => reg_sel_rd_sig,
             REG_SEL_A   => reg_sel_a_sig,
             REG_SEL_B   => reg_sel_b_sig,

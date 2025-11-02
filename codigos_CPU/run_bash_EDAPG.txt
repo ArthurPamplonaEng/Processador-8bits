@@ -8,14 +8,15 @@ ghdl --remove
 
 echo "==== COMPILANDO TODOS OS MÓDULOS ===="
 ghdl -i --std=08 -fsynopsys \
-    unidade_de_controle.vhd \
-    registradores.vhd \
-    ULA.vhd \
-    fila_de_instrucao.vhd \
-    incrementador_pc.vhd \
-    mux_2_para_1.vhd \
+    unidade_de_controle_ajeitada.vhd \
+    registradores_ajeitado.vhd \
+    ULA_ajeitada.vhd \
+    rom_ajeitado.vhd \
+    SHIFTER_8BIT.vhd \
+    incrementador_ajeitado.vhd \
+    mux_2_para_1_ajeitado.vhd \
     design.vhd \
-    testbench.vhd
+    testbench.vhd 
 
 echo "==== ELABORANDO TESTBENCH ===="
 ghdl -m --std=08 testbench
